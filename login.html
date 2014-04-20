@@ -24,7 +24,7 @@
 				<a class="nav-text">LOGIN</a>
 			</div>
 			<div>
-			<form class="login-form">
+			<div class="login-form">
 				<div class="login-header"><p class="title">Sign up to play</p></div>
 				
 				<div class="content">
@@ -35,27 +35,33 @@
 				<div class="register-button">
 					<div class="reg-button" id="reg-bttn">Register</div>
 				</div>
-			</form>
 			</div>
-			<script>
-				var db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
+			</div>
+		</body>
+		<script>
+			var db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
 
-				$("#reg-bttn").click(function() {
+			$("#reg-bttn").click(function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				db.on('value', function(dataSnapshot) {
 					var username = $("#usernameInput").val();
 					console.log(username);
-					db.on('value', function(dataSnapshot) {
-					  	if (dataSnapshot.hasChild(username)) {
-					  		alert("Sorry! username is taken");
-							return;
-					  	}
-					  	var password = $("#passwordInput").val();
-						console.log(password);
-						dataSnapshot.child(username).ref().set({ password: password }, function() {
-							window.location.assign("http://flagtag.github.io/ranks.html");
-						});
+				  	if (dataSnapshot.hasChild(username)) {
+				  		alert("Sorry! username is taken");
+						return;
+				  	}
+				  	var password = $("#passwordInput").val();
+					console.log(password);
+					dataSnapshot.child(username).ref().set({ password: password }, function(error) {
+						if (error) alert("Firebase returned an error");
+						else {
+							console.log("redirecting");
+							//window.location.href = "file:///Users/Mishq/Documents/FlagTag/ranks.html";
+						}
 					});
 				});
+			});
 
-			</script>
-		</body>
+		</script>
 </html>
