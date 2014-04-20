@@ -41,20 +41,17 @@
 			$("#reg-bttn").click(function(e) {
 				e.stopPropagation();
 				e.preventDefault();
-				db.on('value', function(dataSnapshot) {
+				db.once('value', function(dataSnapshot) {
 					var username = $("#usernameInput").val();
-					console.log(username);
 				  	if (dataSnapshot.hasChild(username)) {
 				  		alert("Sorry! username is taken");
 						return;
 				  	}
 				  	var password = $("#passwordInput").val();
-					console.log(password);
 					dataSnapshot.child(username).ref().set({ password: password }, function(error) {
 						if (error) alert("Firebase returned an error");
 						else {
-							console.log("redirecting");
-							//window.location.href = "file:///Users/Mishq/Documents/FlagTag/ranks.html";
+							window.location.href = "flagtag.github.io/ranks.html";
 						}
 					});
 				});
