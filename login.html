@@ -50,7 +50,9 @@
 					  	}
 					  	var password = $("#passwordInput").val();
 						console.log(password);
-						dataSnapshot.child(username).ref().set({ password: password });
+						dataSnapshot.child(username).ref().set({ password: password }, function() {
+							window.location.assign("http://flagtag.github.io/ranks.html");
+						});
 					});
 				});
 
