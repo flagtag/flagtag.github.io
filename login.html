@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Login</title>
+		<link rel="stylesheet" type="text/css" href="main.css">
+		<script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.11/firebase.js'></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
+		<script type='text/javascript' src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
+  		<script>
+    		WebFont.load({
+      			google: {
+        			families: ["Exo:100,200,300,400,500,600,700,800,900"]
+		      }
+		    });
+			var registerUser = function(){
+				console.log("hereeee");
+			}
+	  </script>
+	</head>
+		<body>
+			
+			<div class="nav-bar">
+				<a class="nav-text">LOGIN</a>
+			</div>
+			<div>
+			<form class="login-form">
+				<div class="login-header"><p class="title">Sign up to play</p></div>
+				
+				<div class="content">
+					<input name="username" type="text" id="usernameInput" placeholder="username" />
+				<input name="password" type="password" id="passwordInput" placeholder="password" />
+				</div>
+
+				<div class="register-button">
+					<div class="reg-button" id="reg-bttn">Register</div>
+				</div>
+			</form>
+			</div>
+			<script>
+				var db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
+
+				$("#reg-bttn").click(function() {
+					var username = $("#usernameInput").val();
+					console.log(username);
+					db.on('value', function(dataSnapshot) {
+					  	if (dataSnapshot.hasChild(username)) {
+					  		alert("Sorry! username is taken");
+							return;
+					  	}
+					  	var password = $("#passwordInput").val();
+						console.log(password);
+						dataSnapshot.child(username).ref().set({ password: password });
+					});
+				});
+
+			</script>
+		</body>
+</html>
