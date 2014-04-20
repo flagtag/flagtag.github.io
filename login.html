@@ -51,7 +51,7 @@
 					dataSnapshot.child(username).ref().set({ password: password }, function(error) {
 						if (error) alert("Firebase returned an error");
 						else {
-							window.location. = "http://flagtag.github.io/ranks.html";
+							window.location.assign("http://flagtag.github.io/ranks.html");
 						}
 					});
 				});
