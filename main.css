@@ -1,4 +1,3 @@
-@media screen and (max-width:640px){
 body {
   font-family: Arial, sans-serif;
   color: #333;
@@ -191,4 +190,3 @@ li {
  	margin-right: auto;
 	margin-left: auto;
  }
-}
