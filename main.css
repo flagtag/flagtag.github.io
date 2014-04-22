@@ -19,16 +19,16 @@ h2{
 }
 
 ol{
-	font-size: 20px;
+	font-size: 3em;
 	padding: 0;
 }
 
 li {
     position: relative;
     display: block;
-    padding: .4em .4em .4em .8em;
-    *padding: .4em;
-    margin: .5 0 0.5em 2.5em;
+    padding: 1.2em 1.2em 1.2em 1.2em;
+    *padding: 2em;
+    margin: .5 0 1.5em .5em;
     border-bottom: 1px solid #E3DDD8;
     color: #FF7131;
     text-decoration: none;
@@ -168,10 +168,10 @@ li {
 	margin-left: auto;
 }
 
-
 .rank-text{
+	font-size: 2.5em;
 	font-family: 'Exo', sans-serif;
-	padding-left: 10px;
+	padding-left: 0.2em;
 	color: #15B292;
 }
 
@@ -180,12 +180,12 @@ li {
 	margin-left: auto;
 	margin-right: auto;
 	display: block;
-	padding-top: 20px;
+	padding-top: 3em;
 }
 
  .bottom-text {
  	font-family: 'Exo', sans-serif;
- 	font-size: 24px;
+ 	font-size: 4em;
  	color: #FF7131;
  	text-decoration: none;
  	margin-right: auto;
