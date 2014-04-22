@@ -6,6 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="main.css">
 		<script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.11/firebase.js'></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
+        <script type='text/javascript' src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
   		<script>
     		WebFont.load({
       			google: {
@@ -20,11 +21,7 @@
 			</div>
 			<div class ="flag-tag"><h1 id="flag-count"></h1></div>
 			<div class="list">
-				<ol id="rank-list">
-					<li>1<span class="rank-text">ranks</span></li>
-					<li>2<span class="rank-text">go</span></li>
-					<li>3<span class="rank-text">here</span></li>
-				</ol>
+				<ol id="rank-list"></ol>
 			</div>	
 			<div class="bottom"><a class="bottom-text" href="rules.html">How to play</a></div>
 			<div class="bottom"><a class="bottom-text" href="settings.html">Settings</a></div>
@@ -32,24 +29,21 @@
 		</body>
 <script>
 
-if(!(typeof(Storage)!=="undefined") {
+if(!(typeof(Storage)!=="undefined")) {
     alert("Sorry this game is not supported on your browser");
     return;
 }
 
 /* Constants */
-var NUM_FLAGS               = 200;
-var FLAG_LIST_KEY           = "FLAG_LIST_KEY";
-var RANKS_LIST_KEY          = "RANKS_LIST_KEY";
-var NUM_USERS_KEY           = "NUM_USERS_KEY";
-var flagTagUniqueStorageId  = "darth-vader-pooped-in-a-tree";
+var MAX_FLAG_COUNT          = 200;
+var FLAGS_KEY               = "FLAGS_KEY";
+var USERS_KEY               = "USERS_KEY";
+var flagTagStorageKeyBase   = "darth-vader-pooped-in-a-tree";
+var flagTagStorageUserKey   = flagTagStorageKeyBase + "-username";
+var flagTagStorageFlagKey   = flagTagStorageKeyBase + "-flagId";
 
-var storage = null;
-var userDB = null;
-var ranksDB = null;
-var flagsDB = null;
-var flagId = parseInt(getParameterByName("id"));
-flagId = (flagId === NaN ? -1 : flagId);
+var storageUser = null;
+var db = null;
 
 var getParameterByName = function(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -62,140 +56,114 @@ var setFlagCount = function(count) {
     $("#flag-count").text("You Have " + count + " flags!");
 };
 
-storage = localStorage.getItem(flagTagUniqueStorageId);
-if (!storage || !storage.username)
-    localStorage.setItem(flagTagUniqueStorageId, {
-        recentFlagId: flagId
-    });
-    window.location.href = 'login.html';
-}
-
-userDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + storage.username);
-ranksDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + RANKS_LIST_KEY);
-
 var populateRanksList = function(ranks) {
     var list = $("#rank-list");
-    var num_users = ranks[NUM_USERS_KEY];
-    for (var i = 0; i < num_users; i++) {
+    for (var i = 0; i < ranks.length; i++) {
         var string = "Username: " + ranks[i].username + 
             " FlagCount: " + ranks[i].flagCount;
-        $("<li>1<span class='rank-text'>" + 
+        $("<li><span class='rank-text'>" + 
             string + "</span></li>").appendTo(list);
     }
 };
 
-var resolveRanks = function(name, flagCount) {
-    ranksDB.transaction(function(cur_ranks) {
-        var num_users = cur_ranks[NUM_USERS_KEY];
-        var cur_pos = -1;
-        for (var i = 0; i < num_users; i++) {
-            if (cur_ranks[i].username === name) {
-                cur_pos = i;
-                break;
-            }
-        }
-        var cur = cur_ranks[cur_pos];
-        cur.flagCount = flagCount;
-        var next_rank;
-        while (cur_pos > 0) {
-            next_rank = cur_ranks[cur_pos - 1];
-            if (next_rank.flagCount >= cur.flagCount) {
-                break;
-            }
-            cur_ranks[cur_pos] = next_rank;
-            cur_ranks[cur_pos - 1] = cur;
-            cur_pos--;
-        }
-        return cur_ranks;
-    }, function(error, committed, new_ranks) {
-        if (error) {
-            alert("Sorry something went wrong!");
-        } else if (!committed) {
-            resolveRanks(name, flagCount);
-        } else {
-            populateRanksList(new_ranks);
-        }
-    });
+function sortByFlagCount(userA, userB){
+  return ((userA.flagCount < userB.flagCount) ? 1 : 
+    ((userA.flagCount > userB.flagCount) ? -1 : 0));
 };
 
-var acquireFlag = function(flagId, newOwner) {
-    if (flagId === -1) {
-        return;
-    }
-    flagsDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + FLAGS_LIST_KEY + "/" + flagId);
-    var prevOwnerRef = null;
-    flagsDB.transaction(function(flag) {
-        if (flag.owner && flag.owner !== newOwner) {
-            /* Remove from owner flags */
-            prevOwnerRef = new Firebase('https://blistering-fire-1331.firebaseio.com/' + flag.owner);
-        }
-        flag.owner = newOwner;
-        return flag;
-    }, function(error, committed, newFlag) {
-        if (error || !committed) {
-            alert("Oops the flag was not registered. Please try again!");
-        } else {
-            userDB.transaction(function(cur_user) {
-                cur_user.flagCount++;
-                return cur_user;
-            }, function(error, committed, new_user) {
-                if (error || !committed) {
-                    alert("Oops the flag was not registered. Please try again!");
-                } else if (prevOwnerRef) {
-                    prevOwnerRef.transaction(function(cur_user) {
-                        cur_user.flagCount--;
-                        return cur_user;
-                    });
-                }
-                resolveRanks(newOwner.username, newOwner.flagCount);
-            });
-        }
-    });
-};
-
-userDB.once('value', function(user) {
-    var flagCount = 0;
-    for (flagCount = 0; flagCount < NUM_FLAGS; flagCount++) {
-        if (user.flags[flagCount.toString()]) {
-            flagCount++;
-        }
-    }
-
-    flagsDB.transaction(function(flags) {
-
-    });
-    if (flagId !== -1 && !user.flags[flagId.toString()]) {
-        user.flags[flagId.toString()] = true;
-        flagCount++;
-        userDB.set(user);
-    }
-    setFlagCount(flagCount);
-    
-});
-
-$("#reg-bttn").click(function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    db.once('value', function(dataSnapshot) {
-        var username = $("#usernameInput").val();
-        if (dataSnapshot.hasChild(username)) {
-            alert("Sorry! username is taken");
+var draw = function() {
+    /* Resolve Ranks */
+    db.once('value', function(data) {
+        if (data === null) {
+            alert("There is something wrong. Please try again later");
             return;
         }
-        var password = $("#passwordInput").val();
-        dataSnapshot
-        .child(username)
-        .ref()
-        .set({ password: password }, 
-            function(error) {
-                if (error) {
-                    alert("Firebase returned an error");
-                } else {
-                    window.location.href = "ranks.html";
-                    localStorage.setItem(flagTagUniqueStorageId, username);
-                }
+
+        var users = data.child(USERS_KEY);
+        var ranks = [];
+        users.forEach(function(user) {
+            var userData = user.val();
+            userData.username = user.name();
+            ranks.push(userData);
         });
+        ranks.sort(sortByFlagCount);
+
+        setFlagCount(users.val()[storageUser].flagCount);
+        populateRanksList(ranks);
     });
-});
+};
+
+storageUser = localStorage.getItem(flagTagStorageUserKey);
+if (!storageUser) {
+    localStorage.setItem(flagTagStorageFlagKey, getParameterByName("id"));
+    window.location.href = 'login.html';
+}
+
+db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
+
+var updateDB = function(fid) {
+    if (fid > MAX_FLAG_COUNT || fid < 0) {
+        alert("Not a valid flag. Try and find some more!");
+        return;
+    }
+
+    db.transaction(function(data) {
+        if (!data) {
+            return data;
+        }
+
+        var users = data[USERS_KEY];
+        var flags = data[FLAGS_KEY];
+
+        if (!flags) {
+            flags = {};
+            data[FLAGS_KEY] = {};
+        }
+
+        var flag = flags[fid.toString()];
+        if (!flag) {                                /* Create flag */
+            flags[fid.toString()] = {
+                owner: storageUser
+            };
+            users[storageUser].flagCount++;
+        } else if (flag.owner !== storageUser) {    /* Or swap flag */
+
+            if (flag.owner !== "") 
+                users[flag.owner].flagCount--;
+
+            flag.owner = storageUser;
+            users[storageUser].flagCount++;
+        }
+
+        return data;
+    }, function(error, committed, new_data) {
+        if (error) {
+            alert("Sorry there was an error. Please try again!");
+        } else if (!committed) {
+            updateDB();
+        } else {
+            draw();
+        }
+    });
+};
+
+var flagId = parseInt(getParameterByName("id"));
+if (!isNaN(flagId)) {
+    db.once('value', function(data) {
+        var flagRef = data.child(FLAGS_KEY + "/" + flagId);
+        if (flagRef.val() === null) {
+            flagRef.ref().set({
+                owner: ""
+            }, function(error) {
+                updateDB(flagId);
+            });
+        } else {
+            updateDB(flagId);
+        }
+    });
+} else {
+    draw();
+}
+
 </script>
 </html>

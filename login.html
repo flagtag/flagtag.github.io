@@ -38,78 +38,69 @@
 		</body>
 <script>
 
-if(!(typeof(Storage)!=="undefined") {
+if(!(typeof(Storage)!=="undefined")) {
     alert("Sorry this game is not supported on your browser");
     return;
 }
 
 /* Constants */
 var NUM_FLAGS               = 200;
-var FLAG_LIST_KEY           = "FLAG_LIST_KEY";
-var RANKS_LIST_KEY          = "RANKS_LIST_KEY";
-var NUM_USERS_KEY           = "NUM_USERS_KEY";
-var flagTagUniqueStorageId  = "darth-vader-pooped-in-a-tree";
+var FLAGS_KEY               = "FLAGS_KEY";
+var USERS_KEY               = "USERS_KEY";
+var flagTagStorageKeyBase	= "darth-vader-pooped-in-a-tree";
+var flagTagStorageUserKey  	= flagTagStorageKeyBase + "-username";
+var flagTagStorageFlagKey  	= flagTagStorageKeyBase + "-flagId";
 
-var storage = null;
-var userDB = null;
-var ranksDB = null;
-var flagId = parseInt(getParameterByName("id"));
-flagId = (flagId === NaN ? -1 : flagId);
+var usersDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + USERS_KEY);
 
-storage = localStorage.getItem(flagTagUniqueStorageId);
+var updateDB = function(username, password) {
+    usersDB.transaction(function(users) {
+    	if (users == null) {
+    		users = {};
+    	}
 
-db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
-ranksDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + RANKS_LIST_KEY);
+    	/* Does another user exist? */
+    	if (users[username] && users[username].password !== password) {
+    		alert("Sorry! username is taken");
+			return users;
+    	}
 
-var addUserToRanks = function(name) {
-	/* Add to ranks */
-	ranksDB.transaction(function(cur_ranks) {
-		var num_users = cur_ranks[NUM_USERS_KEY];
-		cur_ranks[num_users.toString()] = {
-			username: name,
-			flagCount: 0
-		};
-		cur_ranks[NUM_USERS_KEY]++;
-		return cur_ranks;
-	}, function(error committed, new_ranks) {
-		if (error) {
-			alert("Sorry! There was a problem logging in.");
-		} else if (!committed) {
-			addUserToRanks(name);
-		} else {
-			storage.username = username;
-			var flagId = storage.recentFlagId;
-			storage.recentFlagId = -1;
-			localStorage.setItem(flagTagUniqueStorageId, storage);
-			window.location.href = "ranks.html?id=" + (flagId === null ? "" : flagId);
-		}
-	});
-}
+    	/* Is user signing in? */
+    	if (users[username] && users[username].password === password) {
+    		return users;
+    	}
+
+        /* Add to users */
+        users[username] = {
+        	password: password,
+        	flagCount: 0
+        };
+
+        return users;
+    }, function(error, committed, new_data) {
+    	if (error) {
+    		alert("Sorry! Something went wrong. Please try again");
+    	} else if (!committed) {
+    		updateDB(username, password);
+    	} else {
+			var flagId = parseInt(localStorage.getItem(flagTagStorageFlagKey));
+			if (isNaN(flagId)) {
+				flagId = -1;
+			}
+			localStorage.removeItem(flagTagStorageFlagKey);
+			localStorage.setItem(flagTagStorageUserKey, username);
+			window.location.href = "ranks.html?id=" + (flagId === -1 ? "" : flagId);
+    	}
+    });
+};
 
 $("#reg-bttn").click(function(e) {
 	e.stopPropagation();
 	e.preventDefault();
-	db.once('value', function(dataSnapshot) {
-		var username = $("#usernameInput").val();
-	  	if (dataSnapshot.hasChild(username)) {
-	  		alert("Sorry! username is taken");
-			return;
-	  	}
-	  	var password = $("#passwordInput").val();
-		dataSnapshot
-		.child(username)
-		.ref()
-		.set({ 
-			password: password,
-			flags: {}
-		}, function(error) {
-			if (error) {
-				alert("Firebase returned an error");
-			} else {
-				addUserToRanks(username);
-			}
-		});
-	});
+	var username = $("#usernameInput").val();
+	var password = $("#passwordInput").val();
+	updateDB(username, password);
 });
+
 </script>
 </html>
