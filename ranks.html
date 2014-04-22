@@ -19,9 +19,10 @@
 			<div class="nav-bar">
 			<a class="nav-text">RANKS</a>
 			</div>
-			<div class ="flag-tag"><h1 id="flag-count"></h1></div>
+			<div class ="flag-tag"><h1 id="flag-count">You have X flags!</h1></div>
 			<div class="list">
-				<ol id="rank-list"></ol>
+				<ol id="rank-list">
+				</ol>
 			</div>	
 			<div class="bottom"><a class="bottom-text" href="rules.html">How to play</a></div>
 			<div class="bottom"><a class="bottom-text" href="settings.html">Settings</a></div>
@@ -59,8 +60,8 @@ var setFlagCount = function(count) {
 var populateRanksList = function(ranks) {
     var list = $("#rank-list");
     for (var i = 0; i < ranks.length; i++) {
-        var string = "Username: " + ranks[i].username + 
-            " FlagCount: " + ranks[i].flagCount;
+        var string = (i + 1) + ". " + ranks[i].username + 
+            ": " + ranks[i].flagCount + " flags";
         $("<li><span class='rank-text'>" + 
             string + "</span></li>").appendTo(list);
     }
