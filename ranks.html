@@ -18,9 +18,9 @@
 			<div class="nav-bar">
 			<a class="nav-text">RANKS</a>
 			</div>
-			<div class ="flag-tag"><h1>You Have 5 flags!</h1></div>
+			<div class ="flag-tag"><h1 id="flag-count"></h1></div>
 			<div class="list">
-				<ol>
+				<ol id="rank-list">
 					<li>1<span class="rank-text">ranks</span></li>
 					<li>2<span class="rank-text">go</span></li>
 					<li>3<span class="rank-text">here</span></li>
@@ -30,4 +30,172 @@
 			<div class="bottom"><a class="bottom-text" href="settings.html">Settings</a></div>
 
 		</body>
+<script>
+
+if(!(typeof(Storage)!=="undefined") {
+    alert("Sorry this game is not supported on your browser");
+    return;
+}
+
+/* Constants */
+var NUM_FLAGS               = 200;
+var FLAG_LIST_KEY           = "FLAG_LIST_KEY";
+var RANKS_LIST_KEY          = "RANKS_LIST_KEY";
+var NUM_USERS_KEY           = "NUM_USERS_KEY";
+var flagTagUniqueStorageId  = "darth-vader-pooped-in-a-tree";
+
+var storage = null;
+var userDB = null;
+var ranksDB = null;
+var flagsDB = null;
+var flagId = parseInt(getParameterByName("id"));
+flagId = (flagId === NaN ? -1 : flagId);
+
+var getParameterByName = function(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
+var setFlagCount = function(count) {
+    $("#flag-count").text("You Have " + count + " flags!");
+};
+
+storage = localStorage.getItem(flagTagUniqueStorageId);
+if (!storage || !storage.username)
+    localStorage.setItem(flagTagUniqueStorageId, {
+        recentFlagId: flagId
+    });
+    window.location.href = 'login.html';
+}
+
+userDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + storage.username);
+ranksDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + RANKS_LIST_KEY);
+
+var populateRanksList = function(ranks) {
+    var list = $("#rank-list");
+    var num_users = ranks[NUM_USERS_KEY];
+    for (var i = 0; i < num_users; i++) {
+        var string = "Username: " + ranks[i].username + 
+            " FlagCount: " + ranks[i].flagCount;
+        $("<li>1<span class='rank-text'>" + 
+            string + "</span></li>").appendTo(list);
+    }
+};
+
+var resolveRanks = function(name, flagCount) {
+    ranksDB.transaction(function(cur_ranks) {
+        var num_users = cur_ranks[NUM_USERS_KEY];
+        var cur_pos = -1;
+        for (var i = 0; i < num_users; i++) {
+            if (cur_ranks[i].username === name) {
+                cur_pos = i;
+                break;
+            }
+        }
+        var cur = cur_ranks[cur_pos];
+        cur.flagCount = flagCount;
+        var next_rank;
+        while (cur_pos > 0) {
+            next_rank = cur_ranks[cur_pos - 1];
+            if (next_rank.flagCount >= cur.flagCount) {
+                break;
+            }
+            cur_ranks[cur_pos] = next_rank;
+            cur_ranks[cur_pos - 1] = cur;
+            cur_pos--;
+        }
+        return cur_ranks;
+    }, function(error, committed, new_ranks) {
+        if (error) {
+            alert("Sorry something went wrong!");
+        } else if (!committed) {
+            resolveRanks(name, flagCount);
+        } else {
+            populateRanksList(new_ranks);
+        }
+    });
+};
+
+var acquireFlag = function(flagId, newOwner) {
+    if (flagId === -1) {
+        return;
+    }
+    flagsDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + FLAGS_LIST_KEY + "/" + flagId);
+    var prevOwnerRef = null;
+    flagsDB.transaction(function(flag) {
+        if (flag.owner && flag.owner !== newOwner) {
+            /* Remove from owner flags */
+            prevOwnerRef = new Firebase('https://blistering-fire-1331.firebaseio.com/' + flag.owner);
+        }
+        flag.owner = newOwner;
+        return flag;
+    }, function(error, committed, newFlag) {
+        if (error || !committed) {
+            alert("Oops the flag was not registered. Please try again!");
+        } else {
+            userDB.transaction(function(cur_user) {
+                cur_user.flagCount++;
+                return cur_user;
+            }, function(error, committed, new_user) {
+                if (error || !committed) {
+                    alert("Oops the flag was not registered. Please try again!");
+                } else if (prevOwnerRef) {
+                    prevOwnerRef.transaction(function(cur_user) {
+                        cur_user.flagCount--;
+                        return cur_user;
+                    });
+                }
+                resolveRanks(newOwner.username, newOwner.flagCount);
+            });
+        }
+    });
+};
+
+userDB.once('value', function(user) {
+    var flagCount = 0;
+    for (flagCount = 0; flagCount < NUM_FLAGS; flagCount++) {
+        if (user.flags[flagCount.toString()]) {
+            flagCount++;
+        }
+    }
+
+    flagsDB.transaction(function(flags) {
+
+    });
+    if (flagId !== -1 && !user.flags[flagId.toString()]) {
+        user.flags[flagId.toString()] = true;
+        flagCount++;
+        userDB.set(user);
+    }
+    setFlagCount(flagCount);
+    
+});
+
+$("#reg-bttn").click(function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    db.once('value', function(dataSnapshot) {
+        var username = $("#usernameInput").val();
+        if (dataSnapshot.hasChild(username)) {
+            alert("Sorry! username is taken");
+            return;
+        }
+        var password = $("#passwordInput").val();
+        dataSnapshot
+        .child(username)
+        .ref()
+        .set({ password: password }, 
+            function(error) {
+                if (error) {
+                    alert("Firebase returned an error");
+                } else {
+                    window.location.href = "ranks.html";
+                    localStorage.setItem(flagTagUniqueStorageId, username);
+                }
+        });
+    });
+});
+</script>
 </html>

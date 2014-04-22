@@ -36,30 +36,80 @@
 			</div>
 			</div>
 		</body>
-		<script>
-			var db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
+<script>
 
-			$("#reg-bttn").click(function(e) {
-				e.stopPropagation();
-				e.preventDefault();
-				db.once('value', function(dataSnapshot) {
-					var username = $("#usernameInput").val();
-				  	if (dataSnapshot.hasChild(username)) {
-				  		alert("Sorry! username is taken");
-						return;
-				  	}
-				  	var password = $("#passwordInput").val();
-					dataSnapshot
-					.child(username)
-					.ref()
-					.set({ password: password }, 
-						function(error) {
-							if (error) alert("Firebase returned an error");
-							else
-								window.location.href = "ranks.html";
-					});
-				});
-			});
+if(!(typeof(Storage)!=="undefined") {
+    alert("Sorry this game is not supported on your browser");
+    return;
+}
 
-		</script>
+/* Constants */
+var NUM_FLAGS               = 200;
+var FLAG_LIST_KEY           = "FLAG_LIST_KEY";
+var RANKS_LIST_KEY          = "RANKS_LIST_KEY";
+var NUM_USERS_KEY           = "NUM_USERS_KEY";
+var flagTagUniqueStorageId  = "darth-vader-pooped-in-a-tree";
+
+var storage = null;
+var userDB = null;
+var ranksDB = null;
+var flagId = parseInt(getParameterByName("id"));
+flagId = (flagId === NaN ? -1 : flagId);
+
+storage = localStorage.getItem(flagTagUniqueStorageId);
+
+db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
+ranksDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + RANKS_LIST_KEY);
+
+var addUserToRanks = function(name) {
+	/* Add to ranks */
+	ranksDB.transaction(function(cur_ranks) {
+		var num_users = cur_ranks[NUM_USERS_KEY];
+		cur_ranks[num_users.toString()] = {
+			username: name,
+			flagCount: 0
+		};
+		cur_ranks[NUM_USERS_KEY]++;
+		return cur_ranks;
+	}, function(error committed, new_ranks) {
+		if (error) {
+			alert("Sorry! There was a problem logging in.");
+		} else if (!committed) {
+			addUserToRanks(name);
+		} else {
+			storage.username = username;
+			var flagId = storage.recentFlagId;
+			storage.recentFlagId = -1;
+			localStorage.setItem(flagTagUniqueStorageId, storage);
+			window.location.href = "ranks.html?id=" + (flagId === null ? "" : flagId);
+		}
+	});
+}
+
+$("#reg-bttn").click(function(e) {
+	e.stopPropagation();
+	e.preventDefault();
+	db.once('value', function(dataSnapshot) {
+		var username = $("#usernameInput").val();
+	  	if (dataSnapshot.hasChild(username)) {
+	  		alert("Sorry! username is taken");
+			return;
+	  	}
+	  	var password = $("#passwordInput").val();
+		dataSnapshot
+		.child(username)
+		.ref()
+		.set({ 
+			password: password,
+			flags: {}
+		}, function(error) {
+			if (error) {
+				alert("Firebase returned an error");
+			} else {
+				addUserToRanks(username);
+			}
+		});
+	});
+});
+</script>
 </html>
