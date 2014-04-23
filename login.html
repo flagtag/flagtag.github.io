@@ -108,7 +108,7 @@ var loginEvent = function(e) {
 
 //$("#reg-bttn").bind('touch', loginEvent);
 $("#reg-bttn").bind('click', loginEvent);
-$("#reg-bttn").tap(loginEvent);
+$("#reg-bttn").on('tap', loginEvent);
 $(window).bind('touchstart click', loginEvent);
 
 </script>
