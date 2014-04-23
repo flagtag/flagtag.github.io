@@ -95,8 +95,6 @@ var updateDB = function(username, password) {
 };
 
 var loginEvent = function(e) {
-    e.stopPropagation();
-    e.preventDefault();
     var username = $("#usernameInput").val();
     var password = $("#passwordInput").val();
 
@@ -105,6 +103,9 @@ var loginEvent = function(e) {
     } else {
         updateDB(username, password);
     }
+
+    e.stopPropagation();
+    e.preventDefault();
 }
 
 //$("#reg-bttn").bind('touch', loginEvent);
