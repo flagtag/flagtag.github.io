@@ -98,6 +98,9 @@ var loginEvent = function(e) {
     var username = $("#usernameInput").val();
     var password = $("#passwordInput").val();
 
+    ("#usernameInput").val("");
+    $("#passwordInput").val("");
+
     if (username === "" || password === "") {
         alert("Username and password cannot be empty!");
     } else {
@@ -111,7 +114,6 @@ var loginEvent = function(e) {
 //$("#reg-bttn").bind('touch', loginEvent);
 $("#reg-bttn").bind('click', loginEvent);
 $("#reg-bttn").on('tap', loginEvent);
-$(window).bind('touchstart click', loginEvent);
 
 </script>
 </html>
