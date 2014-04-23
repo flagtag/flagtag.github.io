@@ -51,7 +51,6 @@ var flagTagStorageKeyBase	= "darth-vader-pooped-in-a-tree";
 var flagTagStorageUserKey  	= flagTagStorageKeyBase + "-username";
 var flagTagStorageFlagKey  	= flagTagStorageKeyBase + "-flagId";
 
-alert("HERE");
 var usersDB = new Firebase('https://blistering-fire-1331.firebaseio.com/' + USERS_KEY);
 
 var updateDB = function(username, password) {
@@ -93,13 +92,21 @@ var updateDB = function(username, password) {
     });
 };
 
-$("#reg-bttn").click(function(e) {
-	e.stopPropagation();
-	e.preventDefault();
-	var username = $("#usernameInput").val();
-	var password = $("#passwordInput").val();
-	updateDB(username, password);
-});
+var loginEvent = function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    var username = $("#usernameInput").val();
+    var password = $("#passwordInput").val();
+
+    if (username === "" || password === "") {
+        alert("Username and password cannot be empty!");
+    } else {
+        updateDB(username, password);
+    }
+}
+
+$("#reg-bttn").bind('touchstart', loginEvent);
+$("#reg-bttn").bind('click', loginEvent);
 
 </script>
 </html>
