@@ -15,7 +15,7 @@ h1{
 
 h2{
 	font-family: 'Exo', sans-serif;
-	font-size: 24px;
+	font-size: 2em;
 	color: #FF7131;
 }
 
@@ -190,7 +190,7 @@ ol{
 }
 
 .rules-text{
-	font-size: 0.5em;
+	font-size: 1em;
 	font-family: 'Exo', sans-serif;
 	padding-left: 0.2em;
 	padding-top: 0em;
@@ -198,7 +198,7 @@ ol{
 }
 
 .bottom{
-	width: 95%;
+	width: 100%;
 	margin-left: auto;
 	margin-right: auto;
 	display: block;
