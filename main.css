@@ -62,7 +62,7 @@ img.logo{
 
 .nav-text{
     display: inline-block;
-    padding-top: 0.8em;
+    padding-top: 0.9em;
     width: 100%;
     clear: none;
     opacity: 1;
@@ -76,7 +76,7 @@ img.logo{
 
 .back-button{
 	position: absolute;
-	top: 1em;
+	top: 0.6em;
 	display: inline-block;
 }
 
