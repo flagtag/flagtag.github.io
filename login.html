@@ -61,8 +61,8 @@ var updateDB = function(username, password) {
 
     	/* Does another user exist? */
     	if (users[username] && users[username].password !== password) {
-    		alert("Sorry! username is taken");
-			return users;
+    		alert("Sorry! Username is taken and password is incorrect");
+			return;
     	}
 
     	/* Is user signing in? */
@@ -80,9 +80,7 @@ var updateDB = function(username, password) {
     }, function(error, committed, new_data) {
     	if (error) {
     		alert("Sorry! Something went wrong. Please try again");
-    	} else if (!committed) {
-    		updateDB(username, password);
-    	} else {
+    	} else if (committed) {
 			var flagId = parseInt(localStorage.getItem(flagTagStorageFlagKey));
 			if (isNaN(flagId)) {
 				flagId = -1;
