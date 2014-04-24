@@ -8,7 +8,7 @@ body {
 }
 h1{
 	font-family: 'Exo', sans-serif;
-	font-size: 1.2em;
+	font-size: 2em;
 	color: #15B292;
 	padding-bottom: 0.4em;
 }
@@ -35,9 +35,8 @@ img.logo{
 }
 
 .flag-tag{
-	margin-right: auto;
-	margin-left: auto;
-	width: 90%;
+	padding-top: 2em;
+	width: 100%;
 	text-align: center;
 }
 
