@@ -40,11 +40,6 @@
 		</body>
 <script>
 $("#usernameInput").val("start");
-if(!(typeof(Storage)!=="undefined")) {
-    alert("Sorry this game is not supported on your browser");
-    $("#usernameInput").val("Sorry this game is not supported on your browser");
-    return;
-}
 
 /* Constants */
 var NUM_FLAGS               = 200;
@@ -112,9 +107,16 @@ var loginEvent = function(e) {
     e.preventDefault();
 }
 
-//$("#reg-bttn").bind('touch', loginEvent);
-$("#reg-bttn").bind('click', loginEvent);
-$("#reg-bttn").on('tap', loginEvent);
+$(document).ready(function() {
+    if(typeof(Storage)!=="undefined") {
+        //$("#reg-bttn").bind('touch', loginEvent);
+        $("#reg-bttn").bind('click', loginEvent);
+        $("#reg-bttn").on('tap', loginEvent);
+    } else {
+        alert("Sorry this game is not supported on your browser");
+        $("#usernameInput").val("Sorry this game is not supported on your browser");
+    }
+});
 
 </script>
 </html>
