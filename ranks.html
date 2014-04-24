@@ -29,12 +29,6 @@
 
 		</body>
 <script>
-
-if(!(typeof(Storage)!=="undefined")) {
-    alert("Sorry this game is not supported on your browser");
-    return;
-}
-
 /* Constants */
 var MAX_FLAG_COUNT          = 200;
 var FLAGS_KEY               = "FLAGS_KEY";
@@ -94,12 +88,6 @@ var draw = function() {
     });
 };
 
-storageUser = localStorage.getItem(flagTagStorageUserKey);
-if (!storageUser) {
-    localStorage.setItem(flagTagStorageFlagKey, getParameterByName("id"));
-    window.location.href = 'login.html';
-}
-
 db = new Firebase('https://blistering-fire-1331.firebaseio.com/');
 
 var updateDB = function(fid) {
@@ -148,23 +136,38 @@ var updateDB = function(fid) {
     });
 };
 
-var flagId = parseInt(getParameterByName("id"));
-if (!isNaN(flagId)) {
-    db.once('value', function(data) {
-        var flagRef = data.child(FLAGS_KEY + "/" + flagId);
-        if (flagRef.val() === null) {
-            flagRef.ref().set({
-                owner: ""
-            }, function(error) {
+$(document).ready(function() {
+    if(!(typeof(Storage)!=="undefined")) {
+        alert("Sorry this game is not supported on your browser");
+        return;
+    }
+    /* If no stored user, redirect to login */
+    storageUser = localStorage.getItem(flagTagStorageUserKey);
+    if (!storageUser) {
+        localStorage.setItem(flagTagStorageFlagKey, getParameterByName("id"));
+        window.location.href = 'login.html';
+    }
+
+    /* If flag caught, updateDB and draw */
+    var flagId = parseInt(getParameterByName("id"));
+    if (!isNaN(flagId)) {
+        db.once('value', function(data) {
+            var flagRef = data.child(FLAGS_KEY + "/" + flagId);
+            if (flagRef.val() === null) {
+                flagRef.ref().set({     /* Add flag with no owner */
+                    owner: ""
+                }, function(error) {
+                    updateDB(flagId);
+                });
+            } else {
                 updateDB(flagId);
-            });
-        } else {
-            updateDB(flagId);
-        }
-    });
-} else {
-    draw();
-}
+            }
+        });
+    } else {
+        /* Just draw flagCount and ranks */
+        draw();
+    }
+});
 
 </script>
 </html>

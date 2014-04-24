@@ -9,7 +9,6 @@
 		<script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.11/firebase.js'></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
 		<script type='text/javascript' src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
-        <script type='text/javascript' src='jquery.mobile.custom.js'></script>
   		<script>
     		WebFont.load({
       			google: {
@@ -104,12 +103,9 @@ var loginEvent = function(e) {
 
 $(document).ready(function() {
     if(typeof(Storage)!=="undefined") {
-        //$("#reg-bttn").bind('touch', loginEvent);
         $("#reg-bttn").bind('touchstart click', loginEvent);
-        //$("#reg-bttn").on('tap', loginEvent);
     } else {
         alert("Sorry this game is not supported on your browser");
-        $("#usernameInput").val("Sorry this game is not supported on your browser");
     }
 });
 
