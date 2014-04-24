@@ -110,8 +110,8 @@ var loginEvent = function(e) {
 $(document).ready(function() {
     if(typeof(Storage)!=="undefined") {
         //$("#reg-bttn").bind('touch', loginEvent);
-        $("#reg-bttn").bind('click', loginEvent);
-        $("#reg-bttn").on('tap', loginEvent);
+        $("#reg-bttn").bind('touchstart click', loginEvent);
+        //$("#reg-bttn").on('tap', loginEvent);
     } else {
         alert("Sorry this game is not supported on your browser");
         $("#usernameInput").val("Sorry this game is not supported on your browser");
