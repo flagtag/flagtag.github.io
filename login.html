@@ -39,14 +39,12 @@
 			</div>
 		</body>
 <script>
-
+$("#usernameInput").val("start");
 if(!(typeof(Storage)!=="undefined")) {
     alert("Sorry this game is not supported on your browser");
     $("#usernameInput").val("Sorry this game is not supported on your browser");
     return;
 }
-
-$("#usernameInput").val("here");
 
 /* Constants */
 var NUM_FLAGS               = 200;
