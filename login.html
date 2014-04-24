@@ -39,8 +39,6 @@
 			</div>
 		</body>
 <script>
-$("#usernameInput").val("start");
-
 /* Constants */
 var NUM_FLAGS               = 200;
 var FLAGS_KEY               = "FLAGS_KEY";
@@ -93,9 +91,6 @@ var updateDB = function(username, password) {
 var loginEvent = function(e) {
     var username = $("#usernameInput").val();
     var password = $("#passwordInput").val();
-
-    $("#usernameInput").val("");
-    $("#passwordInput").val("");
 
     if (username === "" || password === "") {
         alert("Username and password cannot be empty!");
