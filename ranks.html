@@ -55,7 +55,7 @@ var populateRanksList = function(ranks) {
     var list = $("#rank-list");
     for (var i = 0; i < ranks.length; i++) {
         var string = (i + 1) + ". " + ranks[i].username + 
-            ": " + ranks[i].flagCount + " flags";
+            ": " + ranks[i].flagCount;
         $("<li><span class='rank-text'>" + 
             string + "</span></li>").appendTo(list);
     }
